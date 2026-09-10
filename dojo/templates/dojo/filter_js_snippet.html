@@ -1,11 +1,26 @@
 {% load static %}
 <script type="application/javascript" src="{% static "chosen-js/chosen.jquery.min.js" %}"></script>
 <script type="application/javascript">
+    function initFilterMultiSelects() {
+        $('.dojo-filter-set select[multiple], .similar-filters select[multiple]').not('[data-tagulous]').each(function () {
+            $(this).select2({width: '100%', closeOnSelect: false})
+        })
+    }
+
     $(function () {
         $(function () {
-            $('.similar-filters select[multiple]').not('[data-tagulous]').each(function () {
-                $(this).select2();
-            })
+            if ($.fn.select2) {
+                initFilterMultiSelects()
+            } else {
+                // select2 ships with the tagulous form media, so it is absent on filter forms
+                // without a tag field. Load it explicitly there so every filter multi-select
+                // renders as select2 pills instead of a raw, taller <select multiple>.
+                $('<link>', {rel: 'stylesheet', href: "{% static 'tagulous/lib/select2-4/css/select2.min.css' %}"}).appendTo('head')
+                var select2Script = document.createElement('script')
+                select2Script.src = "{% static 'tagulous/lib/select2-4/js/select2.full.min.js' %}"
+                select2Script.onload = initFilterMultiSelects
+                document.head.appendChild(select2Script)
+            }
             $('input[data-tagulous]').each(function () {
                 Tagulous.select2($(this))
             })
